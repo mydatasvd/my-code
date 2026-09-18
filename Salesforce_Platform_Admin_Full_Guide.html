@@ -1,0 +1,627 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platform Administrator — Full Revision Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16202e;--ink-2:#3a4757;--muted:#6a7686;
+  --paper:#f6f7f9;--card:#fff;--line:#e3e7ec;--line-2:#eef1f4;
+  --teal:#1f6f78;--teal-deep:#12545c;--teal-wash:#e7f1f1;
+  --amber:#b4530a;--amber-wash:#fbeee1;--green:#15803d;--green-wash:#e7f3ec;--violet:#5b4bc4;--violet-wash:#eeecfa;
+  --radius:10px;--measure:74ch;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--teal);z-index:50;transition:width .1s linear}
+.layout{display:grid;grid-template-columns:300px 1fr;max-width:1280px;margin:0 auto}
+aside{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:26px 20px 40px;border-right:1px solid var(--line);background:var(--paper)}
+aside .brand{font-family:"Spectral",Georgia,serif;font-weight:700;font-size:1.12rem;line-height:1.2;letter-spacing:-.01em}
+aside .brand span{display:block;font-family:"IBM Plex Mono",monospace;font-size:.6rem;font-weight:500;color:var(--teal);margin-top:6px;letter-spacing:.02em}
+.navcap{margin:20px 0 6px;font-size:.7rem;font-weight:600;color:var(--muted)}
+nav a{display:flex;align-items:baseline;gap:8px;padding:6px 10px;margin:1px -10px;border-radius:7px;color:var(--ink-2);text-decoration:none;font-size:.84rem;line-height:1.3;transition:background .12s,color .12s}
+nav a:hover{background:var(--line-2);color:var(--ink)}
+nav a.active{background:var(--teal-wash);color:var(--teal-deep);font-weight:600}
+nav a .num{font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--muted);min-width:26px}
+nav a.active .num{color:var(--teal)}
+nav a .wt{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:.64rem;color:var(--muted);background:var(--line-2);padding:1px 6px;border-radius:20px;white-space:nowrap}
+nav a.done .num::after{content:"✓";color:var(--green);margin-left:2px}
+.controls{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.controls button{font:inherit;font-size:.78rem;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink-2);padding:8px 12px;border-radius:8px;text-align:left;transition:.12s}
+.controls button:hover{border-color:var(--teal);color:var(--teal-deep)}
+.controls button.on{background:var(--teal);border-color:var(--teal);color:#fff}
+main{padding:42px 52px 120px;max-width:calc(var(--measure) + 140px)}
+header.top h1{font-family:"Spectral",serif;font-weight:700;font-size:2.3rem;line-height:1.08;letter-spacing:-.02em;margin:0 0 6px}
+header.top .sub{color:var(--muted);font-size:.95rem;margin-bottom:20px}
+.facts{display:flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--card);margin-bottom:8px}
+.facts div{flex:1;min-width:110px;padding:13px 16px;border-right:1px solid var(--line-2)}
+.facts div:last-child{border-right:0}
+.facts .k{font-size:.66rem;color:var(--muted);margin-bottom:3px}
+.facts .v{font-family:"Spectral",serif;font-weight:600;font-size:1.2rem}
+.facts .v.pass{color:var(--green)}
+section.lesson{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:18px 0;overflow:hidden;scroll-margin-top:16px}
+.lhead{display:flex;align-items:center;gap:13px;padding:17px 22px;cursor:pointer;user-select:none}
+.lhead:hover{background:#fbfcfd}
+.lhead .ln{font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--teal);font-weight:500;min-width:52px}
+.lhead h2{font-family:"Spectral",serif;font-weight:600;font-size:1.26rem;letter-spacing:-.01em;margin:0;flex:1;line-height:1.2}
+.lhead .dom{font-size:.68rem;color:var(--muted);background:var(--line-2);padding:3px 9px;border-radius:20px;white-space:nowrap}
+.lhead .chev{color:var(--muted);transition:transform .18s;font-size:.78rem}
+section.lesson.collapsed .chev{transform:rotate(-90deg)}
+section.lesson.collapsed .lbody{display:none}
+.lbody{padding:2px 22px 22px;border-top:1px solid var(--line-2)}
+.lbody h3{font-weight:600;font-size:.95rem;color:var(--teal-deep);margin:20px 0 6px}
+.lbody p{margin:9px 0;max-width:var(--measure)}
+.lbody ul{margin:9px 0;padding-left:21px;max-width:var(--measure)}
+.lbody li{margin:5px 0}
+.lbody li::marker{color:var(--teal)}
+code,.mono{font-family:"IBM Plex Mono",monospace;font-size:.85em;background:var(--line-2);padding:1px 5px;border-radius:4px;color:var(--teal-deep)}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic;color:var(--ink-2)}
+.tbl{overflow-x:auto;margin:13px 0;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line-2);vertical-align:top}
+thead th{background:var(--teal-deep);color:#fff;font-weight:600;font-size:.78rem}
+tbody tr:nth-child(even){background:#fafbfc}
+td:first-child{font-weight:500}
+.yes{color:var(--green);font-weight:600}.no{color:var(--amber);font-weight:600}
+.trap{border-left:4px solid var(--amber);background:var(--amber-wash);padding:11px 15px;border-radius:0 8px 8px 0;margin:14px 0}
+.trap b{color:var(--amber);font-weight:600}
+.key{border-left:4px solid var(--teal);background:var(--teal-wash);padding:11px 15px;border-radius:0 8px 8px 0;margin:14px 0}
+.key b{color:var(--teal-deep)}
+.takeaways{background:var(--violet-wash);border:1px solid #d5cff2;border-radius:10px;padding:14px 18px;margin:22px 0 6px}
+.takeaways h4{margin:0 0 8px;font-family:"Spectral",serif;font-size:1.02rem;font-weight:600;color:#3f2f8f}
+.takeaways ul{margin:0;padding-left:20px;max-width:var(--measure)}
+.takeaways li{margin:4px 0;font-size:.9rem}
+.takeaways li::marker{color:var(--violet)}
+pre{background:var(--ink);color:#dfe6ee;padding:14px 16px;border-radius:8px;overflow-x:auto;font-family:"IBM Plex Mono",monospace;font-size:.78rem;line-height:1.6;margin:12px 0}
+pre .hl{color:#7fd4c1;font-weight:500}
+figure{margin:16px 0;text-align:center}
+figure svg{max-width:360px;width:100%;height:auto}
+figure.wide svg{max-width:440px}
+figcaption{font-size:.77rem;color:var(--muted);margin-top:6px;max-width:var(--measure);margin-inline:auto}
+.st{font-family:"IBM Plex Sans";font-size:12px;fill:var(--ink)}
+.stb{font-family:"IBM Plex Sans";font-size:12px;font-weight:600;fill:var(--ink)}
+.sts{font-family:"IBM Plex Sans";font-size:10px;fill:var(--muted)}
+.stw{font-family:"IBM Plex Sans";font-size:12px;font-weight:600;fill:#fff}
+body.cram .lbody p,body.cram .lbody>ul,body.cram .lbody h3{display:none}
+body.cram .lbody .tbl,body.cram .lbody .trap,body.cram .lbody .key,body.cram .lbody pre,body.cram .lbody .takeaways{display:block}
+body.cram header.top .sub{display:none}
+.menubtn{display:none}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  aside{position:fixed;inset:0 auto 0 0;width:282px;z-index:40;transform:translateX(-100%);transition:transform .22s;box-shadow:0 0 40px rgba(0,0,0,.18)}
+  body.navopen aside{transform:none}
+  main{padding:68px 18px 100px}
+  .menubtn{display:inline-flex;position:fixed;top:12px;left:12px;z-index:45;background:var(--ink);color:#fff;border:0;border-radius:8px;padding:9px 13px;font:inherit;font-size:.82rem;cursor:pointer}
+  header.top h1{font-size:1.8rem}
+}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+</style>
+
+<div id="progress"></div>
+<button class="menubtn" id="menubtn">☰ Lessons</button>
+<div class="layout">
+<aside id="side">
+  <div class="brand">Platform Administrator<span>FULL REVISION GUIDE · SUMMER '25 BLUEPRINT</span></div>
+  <div class="navcap">Lessons</div>
+  <nav id="nav"></nav>
+  <div class="controls">
+    <button id="cram">Cram mode — tables, traps &amp; takeaways</button>
+    <button id="toggleall">Collapse all lessons</button>
+  </div>
+</aside>
+<main id="main">
+<header class="top">
+  <h1>Platform Administrator — Full Revision Guide</h1>
+  <div class="sub">All 12 ADX201 lessons at exam depth, plus the Sales / Service / Productivity apps the exam weights but the course covers lightly. Each lesson ends with a Key Takeaways quick-glance. Read a lesson, then answer recall questions from memory.</div>
+  <div class="facts">
+    <div><div class="k">Questions</div><div class="v">60 <span style="font-size:.78rem;color:var(--muted)">(+5)</span></div></div>
+    <div><div class="k">Time</div><div class="v">105 min</div></div>
+    <div><div class="k">Passing</div><div class="v pass">68%</div></div>
+    <div><div class="k">To pass</div><div class="v">~41/60</div></div>
+  </div>
+</header>
+<div id="lessons"></div>
+</main>
+</div>
+
+<script>
+const L=[
+{n:"L1",t:"Salesforce Fundamentals",dom:"Config & Setup",wt:"15%",html:`
+<p>Salesforce is a <strong>multitenant, metadata-driven</strong> cloud platform. Many customers (tenants) share one infrastructure, but each org's data and customizations are isolated. You configure the platform through <strong>metadata</strong> (objects, fields, layouts, automation) rather than changing its code — which is why customizations are portable between orgs.</p>
+<h3>Customer 360 &amp; the clouds</h3>
+<p>The product family spans Sales, Service, Marketing, Commerce, Experience (portals/communities), Data Cloud, and Agentforce — unified around a shared customer record.</p>
+<h3>Build strategy: Use → Configure → Buy → Develop</h3>
+<figure class="wide"><svg viewBox="0 0 440 60" role="img" aria-label="Build order: use, configure, buy, develop">
+<rect x="4" y="14" width="96" height="34" rx="7" fill="#e7f1f1" stroke="#1f6f78"/><text class="st" x="52" y="35" text-anchor="middle" fill="#12545c">1 Use</text>
+<rect x="112" y="14" width="96" height="34" rx="7" fill="#eef4f4" stroke="#4aa0a6"/><text class="st" x="160" y="35" text-anchor="middle">2 Configure</text>
+<rect x="220" y="14" width="96" height="34" rx="7" fill="#eef4f4" stroke="#4aa0a6"/><text class="st" x="268" y="35" text-anchor="middle">3 Buy</text>
+<rect x="328" y="14" width="108" height="34" rx="7" fill="#fbeee1" stroke="#b4530a"/><text class="st" x="382" y="35" text-anchor="middle" fill="#b4530a">4 Develop</text>
+</svg><figcaption>Prefer standard features, then clicks (declarative), then AppExchange, then code — in that order.</figcaption></figure>
+<h3>Sandboxes</h3>
+<div class="tbl"><table><thead><tr><th>Type</th><th>Contains</th><th>Refresh</th></tr></thead><tbody>
+<tr><td>Developer</td><td>Metadata only, small data</td><td>1 / day</td></tr>
+<tr><td>Developer Pro</td><td>Metadata + more data</td><td>1 / day</td></tr>
+<tr><td>Partial Copy</td><td>Metadata + sample data</td><td>5 days</td></tr>
+<tr><td>Full</td><td>Complete production copy</td><td>29 days</td></tr>
+</tbody></table></div>
+<div class="key"><b>Object Manager</b> = configure object settings. <b>Schema Builder</b> = view/build objects &amp; relationships visually.</div>
+<div class="trap"><b>Trap:</b> "dedicated server per customer" describes single-tenant — the opposite of Salesforce.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Multitenant, metadata-driven; you customise with metadata, not code.</li>
+<li>Build order: Use → Configure (clicks) → Buy (AppExchange) → Develop (code).</li>
+<li>Sandboxes: Developer/Dev Pro (metadata), Partial Copy (sample), Full (complete prod copy, 29-day refresh).</li>
+<li>Object Manager configures; Schema Builder visualises relationships.</li>
+</ul></div>`},
+
+{n:"L2",t:"The Big Picture: All Users",dom:"Config & Setup",wt:"15%",html:`
+<h3>Company information &amp; licensing</h3>
+<ul>
+<li><strong>User licenses</strong> (baseline, one per user) · <strong>Permission Set Licenses</strong> (layer on extra functionality) · <strong>Feature licenses</strong> (enable a feature, e.g. Marketing User, Service Cloud User).</li>
+<li>The Company Information page shows edition, default locale/currency/timezone, and used-vs-available license counts.</li>
+</ul>
+<h3>Fiscal year</h3>
+<ul>
+<li><strong>Standard</strong> — pick a start month, normal quarters, freely changeable.</li>
+<li><strong>Custom</strong> — for 4-4-5 / retail calendars; <strong>once enabled it cannot be reverted</strong> to standard.</li>
+</ul>
+<h3>Currency</h3>
+<ul>
+<li>Single currency by default; enabling <strong>multi-currency is irreversible</strong>. Each currency carries a conversion rate.</li>
+<li><strong>Advanced Currency Management</strong> adds dated exchange rates for Opportunities.</li>
+</ul>
+<h3>Manage users</h3>
+<ul>
+<li><strong>Username</strong> is globally unique across all Salesforce (email format; needn't be a real inbox).</li>
+<li><strong>Users cannot be deleted</strong> — only <strong>deactivated</strong> (after reassigning records) or <strong>frozen</strong> (blocks login instantly but does <em>not</em> free the license).</li>
+<li>Deactivation is <strong>blocked</strong> while a user is an active approver in an approval process — remove/replace them first.</li>
+</ul>
+<h3>Login security</h3>
+<div class="tbl"><table><thead><tr><th>Control</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>Login Hours <span class="mono">(profile)</span></td><td>Restrict <em>when</em> users can log in</td></tr>
+<tr><td>Login IP Ranges <span class="mono">(profile)</span></td><td>Restrict <em>where</em> — outside the range is blocked</td></tr>
+<tr><td>Trusted IP Ranges <span class="mono">(org)</span></td><td>Inside = skip identity verification</td></tr>
+<tr><td>Session Settings</td><td>Timeout, IP lock, MFA / high assurance</td></tr>
+<tr><td>Setup Audit Trail</td><td>~6 months of setup changes (who/what/when); export for older</td></tr>
+</tbody></table></div>
+<div class="trap"><b>Trap:</b> Login IP Ranges (profile) <em>block</em> login; Trusted IP Ranges (org) only <em>reduce verification prompts</em>. Don't swap them.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Three license kinds: user, permission set, feature (e.g. Marketing User).</li>
+<li>Custom fiscal year and multi-currency are both one-way switches.</li>
+<li>Never delete a user — deactivate (frees license after reassignment) or freeze (instant block, license not freed).</li>
+<li>Active approver blocks deactivation until replaced.</li>
+<li>Login IP Ranges block; Trusted IP Ranges just reduce verification. Setup Audit Trail = ~6 months.</li>
+</ul></div>`},
+
+{n:"L3",t:"Feature & Object Access",dom:"Config & Setup",wt:"15%",html:`
+<p>Second lock in the building: <strong>object &amp; field access</strong> decides which objects (floors) a user can use and what they can do, before record sharing. Controlled by <strong>profiles</strong>, <strong>permission sets</strong>, and <strong>permission set groups</strong>, all resting on the user's <strong>license</strong>.</p>
+<h3>Object permissions (CRED)</h3>
+<ul>
+<li>Grant <strong>C</strong>reate / <strong>R</strong>ead / <strong>E</strong>dit / <strong>D</strong>elete on the <em>kind</em> of record — not individual records. (Like a driver's licence: which vehicle types, not which car.)</li>
+<li><strong>View All / Modify All</strong> (one object) grant access to every record of that object, ignoring sharing.</li>
+<li>A permission needs a supporting <strong>license</strong>: license → object permission → field permission.</li>
+</ul>
+<h3>Profiles — SEE and DO</h3>
+<p>Assigned <strong>one per user</strong>. Controls apps, tab visibility, page-layout &amp; record-type assignments, object permissions (CRED), field permissions (FLS), and login hours/IP.</p>
+<ul>
+<li>Standard profiles (System Administrator, Standard User, Marketing User, Contract Manager, Solution Manager, <strong>Minimum Access - Salesforce</strong>) <strong>can't be deleted and can't be fully edited</strong>.</li>
+<li><strong>Minimum Access - Salesforce</strong> = least-privilege starting point; assign it, then add access via permission sets/PSGs.</li>
+<li>For custom needs, <strong>clone</strong> an existing profile and edit the copy.</li>
+</ul>
+<h3>Permission sets &amp; groups</h3>
+<figure class="wide"><svg viewBox="0 0 440 84" role="img" aria-label="Total access = profile plus permission sets">
+<rect x="6" y="22" width="94" height="40" rx="8" fill="#e7f1f1" stroke="#1f6f78"/><text class="stb" x="53" y="40" text-anchor="middle" fill="#12545c">Profile</text><text class="sts" x="53" y="54" text-anchor="middle">baseline (1)</text>
+<text class="stb" x="110" y="47" text-anchor="middle">+</text>
+<rect x="120" y="22" width="88" height="40" rx="8" fill="#fff" stroke="#4aa0a6"/><text class="st" x="164" y="40" text-anchor="middle">Perm set</text><text class="sts" x="164" y="54" text-anchor="middle">extra</text>
+<text class="stb" x="218" y="47" text-anchor="middle">+</text>
+<rect x="228" y="22" width="88" height="40" rx="8" fill="#fff" stroke="#4aa0a6"/><text class="st" x="272" y="40" text-anchor="middle">Perm set</text><text class="sts" x="272" y="54" text-anchor="middle">extra</text>
+<text class="stb" x="326" y="47" text-anchor="middle">=</text>
+<rect x="338" y="18" width="96" height="48" rx="8" fill="#12545c"/><text class="stw" x="386" y="38" text-anchor="middle">Total</text><text class="sts" x="386" y="53" text-anchor="middle" fill="#cfe4e5">access</text>
+</svg><figcaption>Permission sets are additive (many per user). PSGs bundle sets by job function.</figcaption></figure>
+<ul>
+<li><strong>Permission set</strong> — extra grants, additive, many per user; assign from the set or the user record.</li>
+<li><strong>Permission set group</strong> — bundle sets for a job function; assign the group.</li>
+<li><strong>Muting permission set</strong> — <em>inside a PSG only</em>, disables specific permissions the sets grant (the one subtractive tool). E.g. remove Delete for interns.</li>
+</ul>
+<h3>Field-level security (FLS)</h3>
+<p>Controls read/edit visibility of individual fields via profile or permission set. A field hidden by FLS disappears from layouts, reports, search, and API — the true field boundary.</p>
+<div class="trap"><b>Traps:</b> object View All/Modify All (one object) ≠ View All Data/Modify All Data (org-wide). Page layout can't reveal a field FLS hides — FLS wins and is the stricter of the two.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>CRED = which record kinds; individual records come later (sharing).</li>
+<li>Profile = SEE + DO, one per user; standard profiles can't be fully edited → clone.</li>
+<li>Minimum Access - Salesforce = least-privilege base + permission sets.</li>
+<li>Permission sets/PSGs add; muting (in a PSG) is the only subtraction.</li>
+<li>FLS governs fields everywhere (reports/API too) and overrides layout.</li>
+</ul></div>`},
+
+{n:"L4",t:"Salesforce Record Access",dom:"Config & Setup",wt:"15%",html:`
+<h3>Building analogy</h3>
+<figure><svg viewBox="0 0 420 210" role="img" aria-label="Security layers org object record field">
+<rect x="8" y="8" width="404" height="196" rx="10" fill="#e7f1f1" stroke="#1f6f78"/><text class="stb" x="22" y="28" fill="#12545c">Organization — the building</text><text class="sts" x="22" y="42">login, IP, hours, MFA</text>
+<rect x="26" y="50" width="368" height="146" rx="9" fill="#fff" stroke="#4aa0a6"/><text class="stb" x="40" y="70" fill="#12545c">Object — a floor</text><text class="sts" x="40" y="84">CRED via profile / perm set / PSG</text>
+<rect x="44" y="92" width="332" height="96" rx="9" fill="#e7f1f1" stroke="#4aa0a6"/><text class="stb" x="58" y="112" fill="#12545c">Record — a room</text><text class="sts" x="58" y="126">OWD, hierarchy, sharing, teams, manual, restriction</text>
+<rect x="62" y="136" width="296" height="42" rx="8" fill="#fff" stroke="#4aa0a6"/><text class="stb" x="76" y="156" fill="#12545c">Field — a file cabinet</text><text class="sts" x="76" y="170">field-level security</text>
+</svg><figcaption>A user must clear every layer. This lesson = the record layer.</figcaption></figure>
+<h3>Ownership &amp; Full Access</h3>
+<ul>
+<li>Each record has an <strong>owner</strong> with <strong>Full Access</strong>: view, edit, share, transfer, change record type, delete. Access is nested: No Access → Read Only → Read/Write → Full Access.</li>
+<li><strong>Queues</strong> can own records (Leads, Cases, Tasks, custom objects); members = users, roles, roles+subordinates, public groups; a list view is auto-created.</li>
+<li><strong>Omnipotent admin</strong>: View All Data / Modify All Data bypass the record layer org-wide.</li>
+</ul>
+<h3>Organization-Wide Defaults (OWD)</h3>
+<div class="tbl"><table><thead><tr><th>OWD</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Private</td><td>Owner + users above them in hierarchy only</td></tr>
+<tr><td>Public Read Only</td><td>Everyone views; owner (+ hierarchy) edits</td></tr>
+<tr><td>Public Read/Write</td><td>Everyone views &amp; edits</td></tr>
+<tr><td>Public R/W/Transfer</td><td>Leads &amp; Cases only — adds transfer</td></tr>
+<tr><td>Controlled by Parent</td><td>Detail inherits master's access</td></tr>
+</tbody></table></div>
+<p>OWD is the most-restrictive baseline for records you don't own; every other tool is an <strong>exception to OWD</strong>.</p>
+<h3>Role hierarchy</h3>
+<ul>
+<li>Rolls access <strong>upward</strong> to managers. "Grant Access Using Hierarchies" can be <strong>disabled on custom objects only</strong>.</li>
+<li><strong>Manager Groups</strong> share up the Manager field on the user record.</li>
+</ul>
+<h3>Sharing rules</h3>
+<div class="tbl"><table><thead><tr><th>Share which</th><th>From</th><th>To</th><th>Access</th></tr></thead><tbody>
+<tr><td>Owner-based or criteria-based</td><td>Public groups, roles, roles+sub, queues (cases)</td><td>Public groups, roles, roles+sub</td><td>Read Only / Read-Write</td></tr>
+</tbody></table></div>
+<p>Grant-only, one-directional; pointless when OWD is public. Use <strong>public groups</strong> to collapse many rules into one.</p>
+<h3>Teams &amp; manual sharing</h3>
+<ul>
+<li><strong>Teams</strong> (Account/Opp/Case): named users on a specific record — collaborators that change per deal.</li>
+<li><strong>Manual sharing</strong>: one-off grant on one record; only when OWD is stricter than Public R/W.</li>
+</ul>
+<h3>Restriction rules — the subtractive layer</h3>
+<figure class="wide"><svg viewBox="0 0 440 150" role="img" aria-label="Grant layers then restrict">
+<rect x="8" y="104" width="270" height="30" rx="7" fill="#e7f1f1" stroke="#1f6f78"/><text class="st" x="22" y="123" fill="#12545c">OWD (baseline)</text>
+<rect x="8" y="70" width="270" height="30" rx="7" fill="#d7ebeb" stroke="#1f6f78"/><text class="st" x="22" y="89" fill="#12545c">+ role hierarchy</text>
+<rect x="8" y="36" width="270" height="30" rx="7" fill="#c3e0e0" stroke="#1f6f78"/><text class="st" x="22" y="55" fill="#12545c">+ sharing · teams · manual</text>
+<text class="stb" x="22" y="24" fill="#15803d">widens ↑</text>
+<rect x="300" y="36" width="132" height="98" rx="8" fill="#fbeee1" stroke="#b4530a"/><text class="stb" x="366" y="80" text-anchor="middle" fill="#b4530a">Restriction rules</text><text class="sts" x="366" y="98" text-anchor="middle" fill="#b4530a">narrow ↓</text>
+</svg><figcaption>Visibility = everything granted, minus restriction-rule filtering.</figcaption></figure>
+<div class="key"><b>Equation:</b> object CRED + FLS + baseline (OWD, hierarchy, sharing, teams, manual) − restriction rules = records the user sees.</div>
+<h3>Data privacy &amp; classification</h3>
+<ul>
+<li><strong>Data privacy</strong>: consent, notice, and regional laws (GDPR-style) that apply wherever you serve/track people.</li>
+<li><strong>Data classification fields</strong>: tag fields with sensitivity metadata to guide access/reporting/compliance decisions (documentation, not an enforcement control by itself).</li>
+</ul>
+<div class="trap"><b>Traps:</b> sharing only grants (restriction rules are separate) · object CRED required before sharing works · manual sharing needs OWD stricter than Public R/W · Grant Access Using Hierarchies is custom-object-only · View All (object) ≠ View All Data.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Layers: Org → Object → Record → Field. This lesson is Record.</li>
+<li>Never delete users; queues can own records; VAD/MAD bypass sharing.</li>
+<li>OWD = baseline exception model; role hierarchy rolls up (custom-object toggle).</li>
+<li>Team = same deal/specific people · Sharing rule = whole role/group always · Manual = one record once.</li>
+<li>Restriction rules are the only tool that removes access.</li>
+</ul></div>`},
+
+{n:"L5",t:"Objects, Fields, Relationships, Formulas",dom:"Object Manager & App Builder",wt:"15%",html:`
+<h3>Objects</h3>
+<ul>
+<li>Standard objects can be customised; custom objects (<code>__c</code>) are <strong>Configurable, Reportable, Searchable, Securable</strong> and come with standard fields, page layouts, record types, automation, and record/field security.</li>
+</ul>
+<h3>Standard vs custom fields</h3>
+<ul>
+<li>Standard fields <strong>can't be deleted</strong>, but you can rename the label, add help text, edit picklist values, set history tracking, add lookup filters, or hide via FLS / remove from layouts.</li>
+<li>Custom fields: many types — text, number, currency, percent, date/time, checkbox, picklist, multi-select, email, phone, URL, text area, rich text, geolocation, auto-number, formula, roll-up summary, lookup, master-detail, encrypted.</li>
+<li><strong>Dependent picklists</strong>: a <em>controlling</em> field filters the values of a <em>dependent</em> field.</li>
+</ul>
+<h3>Relationships</h3>
+<p>Defined on the <strong>child</strong> record. Types: Lookup, Master-Detail, Hierarchy (User object only), Self (lookup to same object), and Junction (two master-details).</p>
+<figure class="wide"><svg viewBox="0 0 440 132" role="img" aria-label="Lookup master-detail junction compared">
+<text class="stb" x="8" y="16" fill="#12545c">Lookup (loose)</text>
+<rect x="8" y="22" width="80" height="26" rx="6" fill="#f1efe8" stroke="#888"/><text class="st" x="48" y="39" text-anchor="middle">Contact</text>
+<rect x="150" y="22" width="80" height="26" rx="6" fill="#f1efe8" stroke="#888"/><text class="st" x="190" y="39" text-anchor="middle">Case</text>
+<line x1="150" y1="35" x2="92" y2="35" stroke="#888" stroke-dasharray="4 3"/>
+<text class="sts" x="250" y="32">delete parent →</text><text class="sts" x="250" y="45">child stays, link clears</text>
+<text class="stb" x="8" y="76" fill="#12545c">Master-detail (tight)</text>
+<rect x="8" y="82" width="90" height="26" rx="6" fill="#e7f1f1" stroke="#1f6f78"/><text class="st" x="53" y="99" text-anchor="middle">Invoice</text>
+<rect x="118" y="82" width="80" height="26" rx="6" fill="#eee9f6" stroke="#5b4bc4"/><text class="st" x="158" y="99" text-anchor="middle">Line item</text>
+<line x1="118" y1="95" x2="98" y2="95" stroke="#1f6f78"/>
+<text class="sts" x="212" y="92">cascade delete · inherit sharing/owner</text><text class="sts" x="212" y="105">roll-up summary on parent</text>
+</svg><figcaption>Junction = two master-details on one object → many-to-many (first MD = primary).</figcaption></figure>
+<div class="tbl"><table><thead><tr><th></th><th>Lookup</th><th>Master-Detail</th></tr></thead><tbody>
+<tr><td>Parent required</td><td>Optional</td><td>Always</td></tr>
+<tr><td>Delete parent</td><td>Clears field</td><td>Cascade-deletes child</td></tr>
+<tr><td>Child sharing/owner</td><td>Independent</td><td>Inherited</td></tr>
+<tr><td>Roll-up summary</td><td class="no">No</td><td class="yes">Yes</td></tr>
+<tr><td>Max as child</td><td>40</td><td>2 (depth 3)</td></tr>
+</tbody></table></div>
+<h3>Roll-up summary &amp; formulas</h3>
+<ul>
+<li><strong>Roll-up summary</strong> (master-detail parent only): COUNT / SUM / MIN / MAX of children, with optional filter.</li>
+<li><strong>Formula field</strong>: read-only calculation. Standard relationship → object name (<code>Account.Industry</code>); custom relationship → <code>__r</code> (<code>Trip__r.Cost__c</code>).</li>
+<li><strong>Cross-object formula</strong>: references parent fields up to <strong>10</strong> levels; <strong>cannot</strong> reference encrypted fields or child records (use roll-up for children).</li>
+<li><strong>Lookup filters</strong> limit which records appear in a lookup.</li>
+</ul>
+<div class="trap"><b>Trap:</b> the "many" side is the child. Roll-up summaries need master-detail. Deleting a field is blocked if it feeds a roll-up, a cross-object formula, or is a controlling picklist field.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Custom objects = Configurable, Reportable, Searchable, Securable.</li>
+<li>Relationship lives on the child; "many" side = child.</li>
+<li>Master-detail: cascade delete, inherited sharing/owner, roll-up allowed. Lookup: loose, independent, no roll-up.</li>
+<li>Junction = 2 master-details (first = primary); Hierarchy relationship is User-only.</li>
+<li>Cross-object formula: up to 10 parent hops, no encrypted/child fields.</li>
+</ul></div>`},
+
+{n:"L6",t:"Customize the UI",dom:"Object Manager & App Builder",wt:"15%",html:`
+<h3>Apps &amp; pages</h3>
+<ul>
+<li><strong>Lightning Apps</strong> (App Manager): bundle tabs + utilities; set nav items; assign to profiles. Reorder tabs per app.</li>
+<li><strong>Lightning App Builder</strong>: build home / app / record pages from components; activate as org default, app default, or app+profile.</li>
+</ul>
+<h3>List views</h3>
+<p>Filtered record lists with sharing (just me / groups / everyone), list-view charts, inline edit, and pinned views.</p>
+<h3>Page layouts &amp; Dynamic Forms</h3>
+<ul>
+<li><strong>Page layouts</strong>: arrange fields, related lists, buttons; assigned by <strong>profile + record type</strong>. <strong>Enhanced related lists</strong> add columns/sorting.</li>
+<li><strong>Dynamic Forms</strong>: place individual fields as components with <strong>visibility rules</strong> (by field value, device, permission) — removes the need for many layouts.</li>
+</ul>
+<h3>Actions</h3>
+<p><strong>Object-specific quick actions</strong> (create/update record, log a call on that object) vs <strong>global actions</strong> (available anywhere via publisher/utility bar).</p>
+<h3>Record types, business process, path</h3>
+<ul>
+<li><strong>Record type</strong>: segment picklist values + assign layouts for the same object; assigned per profile.</li>
+<li><strong>Business/Sales/Support process</strong>: controls which Status/Stage values a record type offers.</li>
+<li><strong>Path</strong>: guided stage bar with key fields + guidance for success.</li>
+</ul>
+<h3>Home page</h3>
+<p>Build a custom Lightning Home page (assistant, charts, components) and assign it.</p>
+<div class="trap"><b>Trap:</b> conditional field visibility on one page → Dynamic Forms. Different picklist sets + layouts per team → Record Types + Business Process. "On this object" → object-specific action; "anywhere" → global action.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>App Manager builds Lightning apps (tabs, utilities, profile assignment).</li>
+<li>Page layouts assign by profile + record type; Dynamic Forms give field-level conditional visibility.</li>
+<li>Record type + business process = per-team picklist values &amp; layouts.</li>
+<li>Path = guided stages; object-specific vs global actions differ by scope.</li>
+</ul></div>`},
+
+{n:"L7",t:"Data Management",dom:"Data & Analytics",wt:"17%",html:`
+<h3>Import / update tools</h3>
+<div class="tbl"><table><thead><tr><th></th><th>Data Import Wizard</th><th>Data Loader</th></tr></thead><tbody>
+<tr><td>Max records</td><td>50,000</td><td>5,000,000</td></tr>
+<tr><td>Objects</td><td>Acct, Contact, Lead, Campaign Mbr, custom</td><td>All</td></tr>
+<tr><td>Upsert (External ID)</td><td>Limited</td><td class="yes">Yes</td></tr>
+<tr><td>Schedule / CLI</td><td class="no">No</td><td class="yes">Yes</td></tr>
+<tr><td>Error/success logs</td><td class="no">No</td><td class="yes">Yes</td></tr>
+<tr><td>Dedupe on import</td><td class="yes">Yes</td><td class="no">No</td></tr>
+</tbody></table></div>
+<div class="key"><b>Data Loader</b> when: &gt;50k, any/custom object, upsert on External ID, scheduling, or error logs. <b>Import Wizard</b> when: ≤50k, supported objects, dedupe on entry, simple browser flow.</div>
+<p><strong>External ID</strong>: a field flagged to match records from an outside system, enabling upsert. Import Wizard matching types identify existing records by ID or External ID.</p>
+<h3>Mass tools &amp; backup</h3>
+<ul>
+<li><strong>Mass Delete</strong> (≤250 at a time) · <strong>Mass Transfer</strong> (bulk reassign ownership) · <strong>Merge duplicate leads</strong>. Always back up before mass changes.</li>
+<li>Deleted records → <strong>Recycle Bin</strong> (15 days) → then hard-deleted.</li>
+<li>Backup options: <strong>Data Export Service</strong> (scheduled weekly/monthly CSV, free), Data Loader export, report export, or third-party backup &amp; restore.</li>
+</ul>
+<h3>Duplicate management (a pair)</h3>
+<ul>
+<li><strong>Matching Rule</strong>: the criteria that identify duplicates (which fields, exact/fuzzy). Three standard rules ship (business/person accounts, contacts, leads).</li>
+<li><strong>Duplicate Rule</strong>: the action when a match is found — <strong>Allow</strong> (with alert/report) or <strong>Block</strong>, on create/edit.</li>
+<li>A Duplicate Rule needs an active Matching Rule to do anything.</li>
+</ul>
+<div class="trap"><b>Trap:</b> any one of {&gt;50k, scheduling, error logs, upsert} points to Data Loader — even if "50,000" is dangled to tempt you toward the Wizard.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Data Loader: big volume, any object, upsert/External ID, scheduling, logs. Import Wizard: small, supported objects, dedupe.</li>
+<li>Data Export Service = free scheduled CSV backup; Recycle Bin holds 15 days.</li>
+<li>Mass Delete ≤250; Mass Transfer reassigns ownership.</li>
+<li>Duplicate management = Matching Rule (how) + Duplicate Rule (action).</li>
+</ul></div>`},
+
+{n:"L8",t:"Declarative Automation",dom:"Automation",wt:"15%",html:`
+<h3>Tool landscape</h3>
+<p><strong>Flow</strong> is the go-to for new automation. <strong>Workflow Rules &amp; Process Builder are legacy</strong> (retiring/migrating) — recognise them, but choose Flow.</p>
+<h3>Validation rules</h3>
+<p>Fire on save; <strong>block the save when the formula returns TRUE</strong>. Run after before-save flows and before the record commits. Used to enforce data quality (required combinations, formats, ranges).</p>
+<h3>Lead management</h3>
+<ul>
+<li><strong>Web-to-Lead</strong> captures leads from a web form; map custom lead fields to Account/Contact/Opportunity fields for conversion.</li>
+<li><strong>Lead Assignment Rules</strong> route new/converted leads to users or queues; <strong>Auto-Response Rules</strong> email the lead. Set a default lead status.</li>
+<li><strong>Converting a lead</strong> creates an Account, Contact, and (optionally) Opportunity.</li>
+</ul>
+<h3>Case management</h3>
+<ul>
+<li><strong>Queues</strong> hold cases for teams; <strong>Case Assignment Rules</strong> route them; <strong>Auto-Response Rules</strong> acknowledge the customer; <strong>Escalation Rules</strong> escalate cases unresolved after a time threshold; <strong>Web-to-Case / Email-to-Case</strong> capture cases.</li>
+</ul>
+<h3>Approval process</h3>
+<ul>
+<li>Multi-step routing with approvers (user, role, manager field, or queue), entry criteria, and parallel/unanimous options.</li>
+<li><strong>Locks the record</strong> during approval (configurable).</li>
+<li>Actions on submit / approve / reject / recall: field updates, email alerts, tasks, outbound messages, create/update records.</li>
+</ul>
+<div class="trap"><b>Trap:</b> a validation rule blocks when its formula is TRUE (not false). Only an approval process locks records natively.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Flow first; Workflow/Process Builder are legacy.</li>
+<li>Validation rule blocks save when formula = TRUE.</li>
+<li>Leads: Web-to-Lead, assignment + auto-response rules, convert → Account/Contact/Opportunity.</li>
+<li>Cases: queues, assignment/auto-response/escalation rules, Web/Email-to-Case.</li>
+<li>Approval process = multi-step + record lock + actions on approve/reject/recall.</li>
+</ul></div>`},
+
+{n:"L9",t:"Flow",dom:"Automation",wt:"15%",html:`
+<h3>Core flow types</h3>
+<div class="tbl"><table><thead><tr><th>Type</th><th>Launches when</th><th>UI</th></tr></thead><tbody>
+<tr><td>Screen Flow</td><td>invoked by button / action / page / Experience site</td><td class="yes">Yes</td></tr>
+<tr><td>Record-Triggered</td><td>a record is created, updated, or deleted</td><td class="no">No</td></tr>
+<tr><td>Schedule-Triggered</td><td>a set date/time schedule</td><td class="no">No</td></tr>
+<tr><td>Autolaunched (no trigger)</td><td>invoked by Apex, another flow, orchestration, or API</td><td class="no">No</td></tr>
+<tr><td>Platform Event-Triggered</td><td>a platform event message is received</td><td class="no">No</td></tr>
+</tbody></table></div>
+<h3>Before-save vs after-save</h3>
+<ul>
+<li><strong>Before-save (fast field update)</strong>: set fields on the <em>same</em> record with no extra DML — most efficient; runs before validation rules.</li>
+<li><strong>After-save</strong>: work with related records, send email, call actions; the record is already in the database.</li>
+<li><strong>Orchestration</strong>: multi-step, multi-user processes across stages.</li>
+</ul>
+<h3>Elements &amp; debugging</h3>
+<ul>
+<li>Data: Get / Create / Update / Delete Records. Logic: Decision, Loop, Assignment, Subflow, Screen, Action. Add <strong>fault paths</strong> for error handling (a fault screen shows on error).</li>
+<li>Test with the built-in <strong>Debug</strong> before activating.</li>
+</ul>
+<h3>Order of execution (partial)</h3>
+<pre>1. System validation (required, type, format)
+<span class="hl">2. BEFORE-SAVE record-triggered flows</span>
+3. Before Apex triggers
+4. Validation rules + duplicate rules
+5. Record saved to DB (not committed)
+6. After Apex triggers
+<span class="hl">7. AFTER-SAVE record-triggered flows</span>
+8. Assignment -> auto-response -> workflow field updates
+9. Escalation, roll-up summary recalc on parent
+10. COMMIT + post-commit (emails, async)</pre>
+<div class="trap"><b>Nail this:</b> before-save flows run <em>before</em> validation rules; after-save flows run <em>after</em> the record is saved; roll-up recalc is late and can cascade to parent automation. Autolaunched (no trigger) does NOT run on record changes — it must be invoked.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>5 flow types; only Screen Flow has UI; only record-triggered reacts to DML.</li>
+<li>Before-save = same-record, no extra DML, before validation. After-save = related records, record already saved.</li>
+<li>Use fault paths for error handling; debug before activating.</li>
+<li>Order: before-save flow → validation → save → after-save flow → workflow updates → roll-up recalc → commit.</li>
+</ul></div>`},
+
+{n:"L10",t:"Create New with Clicks",dom:"Object Mgr / Productivity",wt:"—",html:`
+<h3>Custom objects &amp; tabs</h3>
+<ul>
+<li>Create a custom object: label/plural/API name, record name (<strong>Text</strong> or <strong>Auto-Number</strong>), and features (reports, activities, field history, search).</li>
+<li>Set the object's record access &amp; security (OWD, profiles/permission sets) as part of setup.</li>
+<li><strong>Custom tabs</strong>: custom-object tabs, <strong>Web Tabs</strong> (external web content), <strong>Visualforce Tabs</strong>, and <strong>Lightning Page Tabs</strong>.</li>
+</ul>
+<h3>Deploying metadata — change sets</h3>
+<ul>
+<li><strong>Change sets</strong> migrate metadata between <strong>related orgs</strong> (sandbox ↔ production) via a <strong>deployment connection</strong> that must allow inbound changes on the target.</li>
+<li>Flow: source org creates an <strong>outbound</strong> change set, adds components, and uploads → target receives it as an <strong>inbound</strong> change set to deploy.</li>
+<li>Considerations: change sets can't delete components; some settings (e.g. certain profile settings) behave specially and only apply to items already in the set.</li>
+<li>Alternatives: unmanaged vs managed packages, and metadata API / DevOps tooling.</li>
+</ul>
+<h3>Mobile app</h3>
+<ul>
+<li>The Salesforce mobile app renders Lightning pages; <strong>compact layouts</strong> define the key highlight fields shown at the top of a mobile record.</li>
+</ul>
+<div class="trap"><b>Trap:</b> change sets only work between orgs with a <em>deployment connection</em> (related orgs) and never delete components.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Custom object record name = Text or Auto-Number; enable features at creation.</li>
+<li>Tab types: custom object, Web, Visualforce, Lightning Page.</li>
+<li>Change sets = related-org metadata migration; outbound (source) → inbound (target); target must allow inbound; can't delete components.</li>
+<li>Compact layouts drive mobile highlight fields.</li>
+</ul></div>`},
+
+{n:"L11",t:"Analytics: Reports & Dashboards",dom:"Data & Analytics",wt:"17%",html:`
+<h3>Report types &amp; formats</h3>
+<ul>
+<li><strong>Standard vs custom report types</strong> define which objects/fields are available. "A with B" (only records with a related child) vs "A with or without B" / cross filters (e.g. Accounts <em>without</em> Opportunities).</li>
+<li>Formats: <strong>Tabular</strong> (list, best for export), <strong>Summary</strong> (grouped rows), <strong>Matrix</strong> (rows × columns), <strong>Joined</strong> (multiple blocks).</li>
+</ul>
+<h3>Report features</h3>
+<ul>
+<li><strong>Bucket</strong> columns categorise values inline; <strong>row-level formulas</strong> and <strong>summary formulas</strong> calculate within the report; conditional formatting; filters &amp; cross filters.</li>
+<li><strong>Report charts</strong>: bar, column, line, donut, funnel, gauge, scatter, metric, table, stacked.</li>
+<li><strong>Report folders</strong> control who can view/edit; a user needs folder access to open a report.</li>
+</ul>
+<h3>Dashboards</h3>
+<figure class="wide"><svg viewBox="0 0 440 96" role="img" aria-label="Report feeds dashboard, running user controls data">
+<rect x="8" y="30" width="120" height="40" rx="8" fill="#e7f1f1" stroke="#1f6f78"/><text class="st" x="68" y="48" text-anchor="middle" fill="#12545c">Source report</text><text class="sts" x="68" y="62" text-anchor="middle">in a report folder</text>
+<line x1="128" y1="50" x2="182" y2="50" stroke="#1f6f78"/><polygon points="182,45 192,50 182,55" fill="#1f6f78"/>
+<rect x="196" y="30" width="130" height="40" rx="8" fill="#eef4f4" stroke="#4aa0a6"/><text class="st" x="261" y="48" text-anchor="middle">Dashboard</text><text class="sts" x="261" y="62" text-anchor="middle">in a dashboard folder</text>
+<rect x="344" y="26" width="90" height="48" rx="8" fill="#fbeee1" stroke="#b4530a"/><text class="stb" x="389" y="45" text-anchor="middle" fill="#b4530a">Running user</text><text class="sts" x="389" y="60" text-anchor="middle" fill="#b4530a">sets data seen</text>
+</svg><figcaption>The running user determines whose data the dashboard shows.</figcaption></figure>
+<ul>
+<li><strong>Static/standard dashboard</strong>: fixed running user — all viewers see that person's data.</li>
+<li><strong>Dynamic dashboard</strong>: <em>run as logged-in user</em> — each viewer sees only their own data; one dashboard scales to many users (edition-limited count).</li>
+<li>To <em>view</em> a dashboard you need the <strong>dashboard folder</strong>; you don't need the source report's folder to see the dashboard (only to open the underlying report).</li>
+<li><strong>Subscribe / schedule / send</strong> for both reports and dashboards (refreshed results by email).</li>
+</ul>
+<div class="trap"><b>Traps:</b> "each rep sees only their own numbers, many reps" → dynamic dashboard · "sees dashboard but can't open the report" → missing report-folder access · a dashboard shows the <em>running user's</em> data, not the viewer's.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Formats: Tabular (export), Summary (groups), Matrix (rows×cols), Joined (blocks).</li>
+<li>"With/without" report types &amp; cross filters find records missing a related child.</li>
+<li>Bucket, row-level &amp; summary formulas add calculation without new fields.</li>
+<li>Running user sets dashboard data; dynamic = each viewer's own data.</li>
+<li>Dashboard-folder access to view; report-folder access to drill in.</li>
+</ul></div>`},
+
+{n:"L12",t:"The Agentic Enterprise (Agentforce)",dom:"Agentforce",wt:"8%",html:`
+<h3>Agentic AI &amp; Agentforce</h3>
+<ul>
+<li><strong>Agentforce</strong> delivers AI agents on the platform — a set of tools <em>and</em> a suite of agents. <strong>Autonomous agents</strong> act on their own within scope; <strong>assistive agents</strong> help a human.</li>
+<li>Generative AI is <strong>probabilistic</strong> → great for summarise / draft / answer / classify; wrong for deterministic/exact/guaranteed tasks (use Flow/formula/validation there).</li>
+</ul>
+<h3>How it works — the agentic loop</h3>
+<figure class="wide"><svg viewBox="0 0 440 60" role="img" aria-label="Agentic loop reasoning action outcome">
+<rect x="8" y="16" width="120" height="34" rx="7" fill="#eee9f6" stroke="#5b4bc4"/><text class="st" x="68" y="37" text-anchor="middle" fill="#3f2f8f">Reasoning</text>
+<line x1="128" y1="33" x2="152" y2="33" stroke="#5b4bc4"/><polygon points="152,28 162,33 152,38" fill="#5b4bc4"/>
+<rect x="166" y="16" width="110" height="34" rx="7" fill="#eee9f6" stroke="#5b4bc4"/><text class="st" x="221" y="37" text-anchor="middle" fill="#3f2f8f">Action</text>
+<line x1="276" y1="33" x2="300" y2="33" stroke="#5b4bc4"/><polygon points="300,28 310,33 300,38" fill="#5b4bc4"/>
+<rect x="314" y="16" width="120" height="34" rx="7" fill="#eee9f6" stroke="#5b4bc4"/><text class="st" x="374" y="37" text-anchor="middle" fill="#3f2f8f">Outcome</text>
+</svg><figcaption>The Atlas Reasoning Engine classifies intent → picks a topic → selects an action → returns an outcome.</figcaption></figure>
+<h3>Building blocks (an agent's attributes)</h3>
+<ul>
+<li><strong>Role, Data, Actions, Guardrails, Channel</strong> define an agent.</li>
+<li><strong>Topics</strong> = jobs-to-be-done (scope + instructions); <strong>Actions</strong> = what it can do within a topic (Flows, Apex, prompt templates, standard actions). Built in <strong>Agent Builder</strong>.</li>
+<li><strong>Atlas Reasoning Engine</strong> = the planner (intent → topic → action).</li>
+</ul>
+<h3>Prompts &amp; Trust Layer</h3>
+<ul>
+<li><strong>Prompts / prompt templates</strong> (sales email, field generation, record summary, flex) ground generative responses in CRM data via RAG / dynamic grounding.</li>
+<li><strong>Einstein Trust Layer</strong> = guardrails: secure data retrieval, dynamic grounding, data masking, toxicity detection, audit trail, zero data retention. It secures — it does <strong>not</strong> make output deterministic.</li>
+</ul>
+<div class="trap"><b>Traps:</b> deterministic/exact task → not generative AI · action fails but answers work → check the <em>agent user's</em> permissions · Trust Layer = security/guardrails, not determinism · Conversation Preview tests before activation.</div>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Autonomous vs assistive agents; generative AI suits summarise/draft/answer, not exact/guaranteed tasks.</li>
+<li>Topics (jobs + instructions) + Actions (what it does), built in Agent Builder.</li>
+<li>Atlas Reasoning Engine plans intent → topic → action → outcome.</li>
+<li>Trust Layer = masking, toxicity, zero retention, audit (security, not determinism).</li>
+<li>Agent runs with its assigned user's permissions; preview before activating.</li>
+</ul></div>`},
+
+{n:"S",t:"Sales · Service · Productivity apps",dom:"30% combined",wt:"30%",html:`
+<p>These three domains total 30% of the exam but are lighter in ADX201. Focus on the blueprint essentials below.</p>
+<h3>Sales &amp; Marketing (10%)</h3>
+<ul>
+<li><strong>Lead</strong> is pre-qualification; <strong>Convert</strong> → Account + Contact + (optional) Opportunity with field mapping.</li>
+<li>Lead Assignment Rules, Web-to-Lead, lead/opportunity scoring (Einstein).</li>
+<li><strong>Opportunity</strong>: Stages tied to sales process/record type, Path, forecast category; Products &amp; Price Books; Territory Management; forecasting.</li>
+<li><strong>Campaigns + Campaign Members</strong> track marketing; Campaign Influence links to opportunities.</li>
+</ul>
+<h3>Service &amp; Support (10%)</h3>
+<ul>
+<li>Case lifecycle: assignment rules → queues → escalation; auto-response to the customer; Support Process controls Status per record type.</li>
+<li><strong>Web-to-Case / Email-to-Case</strong> capture; <strong>Omni-Channel</strong> routes work; <strong>Knowledge</strong> articles; <strong>Entitlements / Milestones</strong> for SLAs; Case Teams for collaboration.</li>
+</ul>
+<h3>Productivity &amp; Collaboration (10%)</h3>
+<ul>
+<li><strong>Activities</strong>: Tasks (to-dos) + Events (calendar) on the activity timeline.</li>
+<li><strong>Chatter</strong>: feeds, groups (public/private/unlisted), internal vs external users, follow records/people.</li>
+<li><strong>AppExchange</strong>: managed vs unmanaged packages; partners publish; AgentExchange for agents. Mobile app customisation &amp; branding.</li>
+</ul>
+<div class="takeaways"><h4>Key takeaways</h4><ul>
+<li>Lead convert → Account + Contact + Opportunity; campaigns track members &amp; influence.</li>
+<li>Cases: assignment → queue → escalation, Web/Email-to-Case, Omni-Channel, Knowledge, Entitlements (SLA).</li>
+<li>Activities = Tasks + Events; Chatter groups have three privacy levels.</li>
+<li>Managed (upgradeable) vs unmanaged (editable) packages on AppExchange.</li>
+</ul></div>`}
+];
+
+const nav=document.getElementById('nav'),wrap=document.getElementById('lessons');
+L.forEach((l,i)=>{
+  const id='l'+i;
+  const a=document.createElement('a');a.href='#'+id;a.dataset.id=id;
+  a.innerHTML='<span class="num">'+l.n+'</span><span>'+l.t+'</span><span class="wt">'+l.wt+'</span>';
+  nav.appendChild(a);
+  const s=document.createElement('section');s.className='lesson';s.id=id;
+  s.innerHTML='<div class="lhead"><span class="ln">'+l.n+'</span><h2>'+l.t+'</h2><span class="dom">'+l.dom+'</span><span class="chev">▼</span></div><div class="lbody">'+l.html+'</div>';
+  wrap.appendChild(s);
+});
+document.querySelectorAll('.lhead').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('collapsed')));
+const secs=[...document.querySelectorAll('section.lesson')],links=[...nav.querySelectorAll('a')];
+const byId=id=>links.find(a=>a.dataset.id===id);
+const io=new IntersectionObserver(es=>{es.forEach(e=>{const a=byId(e.target.id);if(e.isIntersecting){links.forEach(x=>x.classList.remove('active'));a.classList.add('active');a.classList.add('done');}});},{rootMargin:'-45% 0px -50% 0px'});
+secs.forEach(s=>io.observe(s));
+const prog=document.getElementById('progress');
+addEventListener('scroll',()=>{const h=document.documentElement;prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';},{passive:true});
+const cram=document.getElementById('cram');
+cram.addEventListener('click',()=>{document.body.classList.toggle('cram');cram.classList.toggle('on');cram.textContent=document.body.classList.contains('cram')?'Cram mode ON — exit to full text':'Cram mode — tables, traps & takeaways';});
+const ta=document.getElementById('toggleall');
+ta.addEventListener('click',()=>{const c=!ta.classList.contains('on');ta.classList.toggle('on');secs.forEach(s=>s.classList.toggle('collapsed',c));ta.textContent=c?'Expand all lessons':'Collapse all lessons';});
+const mb=document.getElementById('menubtn');
+mb.addEventListener('click',()=>document.body.classList.toggle('navopen'));
+nav.addEventListener('click',()=>document.body.classList.remove('navopen'));
+</script>
