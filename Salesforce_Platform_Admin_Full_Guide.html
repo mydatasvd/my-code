@@ -188,8 +188,22 @@ const L=[
 <tr><td>Setup Audit Trail</td><td>~6 months of setup changes (who/what/when); export for older</td></tr>
 </tbody></table></div>
 <div class="trap"><b>Trap:</b> Login IP Ranges (profile) <em>block</em> login; Trusted IP Ranges (org) only <em>reduce verification prompts</em>. Don't swap them.</div>
+<h3>Feature licenses in practice</h3>
+<ul>
+<li>Assigning a profile alone doesn't always grant a feature — e.g. the <strong>Service Cloud User</strong> feature license (User Detail page) is the specific piece needed for full <strong>Service Console</strong> access; without it, users assigned to a support profile still can't use console features even if the profile/permission sets look complete.</li>
+<li>Check <strong>Company Information → User Licenses related list</strong> to see each license type purchased, in-use, and remaining — the go-to place for license-budgeting questions.</li>
+</ul>
+<h3>Locked-out and blocked users</h3>
+<ul>
+<li>A user locked out by repeated failed logins: use <strong>Unlock</strong> (clears the lockout) <strong>and Reset Password</strong> (sends a reset email) on the user record — both, not "Login As" (can't log in as someone still locked out).</li>
+<li><strong>Login As</strong> (no password needed) is the right troubleshooting tool when a specific user hits an error others don't — it replicates their exact profile/permissions/layout so you see precisely what they see.</li>
+<li><strong>Deactivation blockers</strong> beyond an active approver: a user who is the <strong>running user of a dashboard</strong>, the <strong>sole recipient of a workflow email alert</strong>, or the selected user in a <strong>custom hierarchy field</strong> also can't be deactivated until that dependency is reassigned. <strong>Freeze</strong> is the safe stopgap while you sort out the blocker.</li>
+</ul>
+<div class="key"><b>Company Settings</b> is the umbrella covering Company Information, Currencies, Fiscal Year, and Business Hours — one place for all org-identity and time/money configuration.</div>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
-<li>Three license kinds: user, permission set, feature (e.g. Marketing User).</li>
+<li>Three license kinds: user, permission set, feature (e.g. Marketing User, Service Cloud User).</li>
+<li>Locked-out user → Unlock + Reset Password. Troubleshooting another user's error → Login As.</li>
+<li>Deactivation can also be blocked by: dashboard running user, sole workflow email-alert recipient, custom hierarchy field reference.</li>
 <li>Custom fiscal year and multi-currency are both one-way switches.</li>
 <li>Never delete a user — deactivate (frees license after reassignment) or freeze (instant block, license not freed).</li>
 <li>Active approver blocks deactivation until replaced.</li>
@@ -229,8 +243,21 @@ const L=[
 <h3>Field-level security (FLS)</h3>
 <p>Controls read/edit visibility of individual fields via profile or permission set. A field hidden by FLS disappears from layouts, reports, search, and API — the true field boundary.</p>
 <div class="trap"><b>Traps:</b> object View All/Modify All (one object) ≠ View All Data/Modify All Data (org-wide). Page layout can't reveal a field FLS hides — FLS wins and is the stricter of the two.</div>
+<h3>Delegated Administration</h3>
+<p>Lets a non-admin (e.g. a junior/regional admin) manage a defined slice of users and custom objects, without full System Administrator power.</p>
+<div class="tbl"><table><thead><tr><th>Delegated admins CAN</th><th>Delegated admins CANNOT</th></tr></thead><tbody>
+<tr><td>Unlock users; reset passwords</td><td>Assign profiles with <strong>Modify All Data</strong> (e.g. System Admin)</td></tr>
+<tr><td>Assign users to specific <strong>"Assignable Profiles"</strong> configured for their group</td><td>Modify all data (only the standard admin can)</td></tr>
+<tr><td><strong>Assign</strong> existing permission sets to users</td><td><strong>Create or edit</strong> permission sets themselves</td></tr>
+<tr><td>Manage <strong>custom objects</strong> (fields, FLS) assigned to their group</td><td>Manage <strong>standard objects</strong> at all</td></tr>
+<tr><td>—</td><td>Set org-wide sharing defaults (OWD)</td></tr>
+</tbody></table></div>
+<h3>A profile-permission gotcha</h3>
+<p>Users on a custom profile cloned from <strong>Minimum Access - Salesforce</strong> can still fail to see the Lightning UI at all, even with permission sets assigned — the missing piece is usually the <strong>"Lightning Experience User"</strong> permission itself (grantable via profile or permission set). Everything else (apps, pages, components) only matters once a user can already reach Lightning.</p>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>CRED = which record kinds; individual records come later (sharing).</li>
+<li>Delegated admins <em>assign</em> profiles/permission sets within their scope; they never <em>create/edit</em> permission sets, touch standard objects, or set OWD.</li>
+<li>No Lightning UI at all, despite permission sets → check for the "Lightning Experience User" permission.</li>
 <li>Profile = SEE + DO, one per user; standard profiles can't be fully edited → clone.</li>
 <li>Minimum Access - Salesforce = least-privilege base + permission sets.</li>
 <li>Permission sets/PSGs add; muting (in a PSG) is the only subtraction.</li>
@@ -290,8 +317,13 @@ const L=[
 <li><strong>Data classification fields</strong>: tag fields with sensitivity metadata to guide access/reporting/compliance decisions (documentation, not an enforcement control by itself).</li>
 </ul>
 <div class="trap"><b>Traps:</b> sharing only grants (restriction rules are separate) · object CRED required before sharing works · manual sharing needs OWD stricter than Public R/W · Grant Access Using Hierarchies is custom-object-only · View All (object) ≠ View All Data.</div>
+<h3>Default Account Teams</h3>
+<p>A user can define a <strong>Default Account Team</strong> on their own User record — a preset list of colleagues (e.g. a Sales Engineer, a Support Rep) with fixed roles and access levels (Read Only / Read-Write). Salesforce then auto-adds that same team to every Account that user creates. This is the fit for "automatically add the same collaborators, with defined access, to many accounts" — Sharing Rules can't replicate a repeatable named team, and Permission Sets don't grant record-level access at all.</p>
+<div class="trap"><b>Trap — manual sharing is fragile:</b> deactivating a user <strong>deletes their manual shares</strong>. Reactivating the user later does <strong>not</strong> restore them, and re-adding the user to a Team only grants access to <em>new</em> records going forward, not retroactively to what manual sharing used to cover. If a reactivated user can suddenly no longer see old records they used to, manual sharing loss is the most likely cause.</div>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>Layers: Org → Object → Record → Field. This lesson is Record.</li>
+<li>Default Account Team = auto-add a fixed set of named collaborators (with access levels) to every Account a user creates.</li>
+<li>Deactivating a user deletes their manual shares permanently — reactivation does not bring them back.</li>
 <li>Never delete users; queues can own records; VAD/MAD bypass sharing.</li>
 <li>OWD = baseline exception model; role hierarchy rolls up (custom-object toggle).</li>
 <li>Team = same deal/specific people · Sharing rule = whole role/group always · Manual = one record once.</li>
@@ -338,8 +370,26 @@ const L=[
 <li><strong>Lookup filters</strong> limit which records appear in a lookup.</li>
 </ul>
 <div class="trap"><b>Trap:</b> the "many" side is the child. Roll-up summaries need master-detail. Deleting a field is blocked if it feeds a roll-up, a cross-object formula, or is a controlling picklist field.</div>
+<h3>Field type conversions — what actually happens</h3>
+<ul>
+<li><strong>Auto Number → Text</strong> is non-destructive: existing values are preserved exactly as static text (no data loss). A common reason to do this deliberately is to "break" the auto-number sequence — convert to Text, adjust/leave records, convert back to Auto Number with a new starting value.</li>
+<li><strong>Text → Picklist</strong> carries real risk: any <strong>list view</strong> built on that field is deleted; <strong>assignment/escalation rule</strong> criteria referencing the field's old text values may break; Salesforce does <strong>not</strong> auto-update Visualforce or Apex references; and a <strong>global value set</strong> does <strong>not</strong> prevent data loss (it standardises future values, it doesn't map existing free-text to picklist options).</li>
+<li><strong>Master-Detail → Lookup</strong> conversion is blocked while any <strong>roll-up summary field exists on the parent</strong> — delete those first (a junction requirement or populated/required lookup field are not blockers).</li>
+</ul>
+<h3>Three characteristics of master-detail (exam-style list)</h3>
+<ul>
+<li>The <strong>master</strong> side can be a <strong>standard or custom</strong> object.</li>
+<li><strong>Roll-up summary</strong> fields are supported (COUNT/SUM/MIN/MAX).</li>
+<li>The <strong>detail record's owner is the master's owner</strong> — detail has no independent owner field.</li>
+<li>(Not true: permissions are independent on the detail — they're inherited; and the limit is <strong>2</strong> master-detail relationships per object, not five.)</li>
+</ul>
+<h3>Renaming a standard field's label</h3>
+<p>You can't edit a standard field's label from Fields &amp; Relationships (e.g. Account's "Type" can't be typed over to "Tier" there). Use <strong>Rename Tabs and Labels</strong> in Setup instead — it changes the display label org-wide (cosmetic only; the API name like <code>Account.Type</code> is unchanged).</p>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>Custom objects = Configurable, Reportable, Searchable, Securable.</li>
+<li>Auto Number→Text keeps existing values as text (non-destructive); Text→Picklist can delete list views and break assignment/escalation rule criteria.</li>
+<li>Master-detail→Lookup is blocked by existing roll-up summaries on the parent.</li>
+<li>Can't rename a standard field's label directly — use Rename Tabs and Labels.</li>
 <li>Relationship lives on the child; "many" side = child.</li>
 <li>Master-detail: cascade delete, inherited sharing/owner, roll-up allowed. Lookup: loose, independent, no roll-up.</li>
 <li>Junction = 2 master-details (first = primary); Hierarchy relationship is User-only.</li>
@@ -370,8 +420,30 @@ const L=[
 <h3>Home page</h3>
 <p>Build a custom Lightning Home page (assistant, charts, components) and assign it.</p>
 <div class="trap"><b>Trap:</b> conditional field visibility on one page → Dynamic Forms. Different picklist sets + layouts per team → Record Types + Business Process. "On this object" → object-specific action; "anywhere" → global action.</div>
+<h3>Compact Layouts — the most-confused UI element</h3>
+<p>A <strong>Compact Layout</strong> (separate from Page Layout) controls three specific surfaces: the <strong>Highlights Panel</strong> at the top of a record, fields shown on <strong>Kanban cards</strong>, and fields shown on <strong>mobile</strong> record views. If a sales team wants different fields on their Opportunity Kanban cards, or a field added to the page layout also needs to show in the highlights panel, the fix in both cases is editing/creating a <strong>Compact Layout</strong> — not the Page Layout, not Record Types, and not "Kanban Settings" (which only controls grouping/summarization, e.g. "group by Stage, sum Amount").</p>
+<div class="key"><b>Memory hook:</b> Page Layout = full record detail. Compact Layout = the "quick glance" fields (highlights, Kanban, mobile).</div>
+<h3>Component visibility can key off a Permission Set, not just a field</h3>
+<p>When two teams share one <strong>profile</strong> but hold different <strong>permission sets</strong>, and only one team should see a component (e.g. a "Retention" related list), use <strong>Component Visibility</strong> filters in Lightning App Builder set to check for a specific <strong>permission</strong> — not just record field values. This is how Dynamic Pages personalize per-team without duplicating profiles or page layouts.</p>
+<h3>Diagnosing a slow Lightning page</h3>
+<p>Lightning App Builder has a built-in <strong>page performance analysis</strong> ("Analyze" button) that scores a record page and flags which components are dragging load time — the first stop before restructuring page components or business logic.</p>
+<h3>Adding standard components back</h3>
+<ul>
+<li>Missing <strong>Activity Timeline</strong> on a record page → drag the standard <strong>Activities</strong> component onto the Lightning page via App Builder (not a permission or report issue).</li>
+<li>A standard quick action (e.g. <strong>Log a Call</strong>) missing from the Highlights Panel → add it to the <strong>"Salesforce Mobile and Lightning Experience Actions"</strong> section of the page layout (there's no custom permission gating standard actions).</li>
+</ul>
+<h3>Mobile app specifics</h3>
+<ul>
+<li><strong>Lightning App Builder page types</strong>: App Page, Record Page, and Home Page — all three usable for both desktop and mobile (toggle the canvas view to check phone layout before activating).</li>
+<li><strong>Mobile Only navigation</strong> (when no Lightning app has been set up for mobile yet): the <strong>first four items</strong> configured appear both in the full nav menu <em>and</em> in the bottom nav bar. This navigation is <strong>global</strong> — not customisable per profile or permission set.</li>
+<li><strong>Mobile Home</strong>: an enable-able landing page with customizable cards (reports, dashboards, recent records) — the way to make a specific report the first thing users see on mobile.</li>
+<li><strong>Mobile branding</strong> options are specifically the <strong>loading page logo</strong> and the <strong>header background color</strong> (not a generic "app header color" or record background).</li>
+</ul>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>App Manager builds Lightning apps (tabs, utilities, profile assignment).</li>
+<li>Compact Layout (not Page Layout) controls Highlights Panel, Kanban card fields, and mobile fields.</li>
+<li>Component Visibility can filter by Permission Set — the fix for "same profile, different access, different UI."</li>
+<li>Lightning App Builder's "Analyze" button diagnoses slow record pages.</li>
 <li>Page layouts assign by profile + record type; Dynamic Forms give field-level conditional visibility.</li>
 <li>Record type + business process = per-team picklist values &amp; layouts.</li>
 <li>Path = guided stages; object-specific vs global actions differ by scope.</li>
@@ -402,8 +474,15 @@ const L=[
 <li>A Duplicate Rule needs an active Matching Rule to do anything.</li>
 </ul>
 <div class="trap"><b>Trap:</b> any one of {&gt;50k, scheduling, error logs, upsert} points to Data Loader — even if "50,000" is dangled to tempt you toward the Wizard.</div>
+<h3>Undoing a mistaken import; exporting filtered data</h3>
+<ul>
+<li>To <strong>undo an accidental bulk import</strong>: use <strong>Data Loader</strong> (delete via a CSV of the record IDs you exported) or <strong>Mass Delete Records</strong> (Setup → Data Management) if the records can be identified by simple criteria without a file. Both delete in bulk; Weekly Export/Import Wizard cannot.</li>
+<li><strong>Data Loader's export</strong> can run a <strong>SOQL query</strong> to pull only specific fields for records matching a filter (e.g. <code>Closed Won</code> Opportunities from the last 90 days) — the right tool whenever an export needs to be filtered and field-specific.</li>
+<li><strong>Weekly/Data Export Service</strong> is a full, scheduled backup of your org's data — it is <strong>not</strong> filterable by criteria and isn't the tool for an ad-hoc, field-specific export.</li>
+</ul>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>Data Loader: big volume, any object, upsert/External ID, scheduling, logs. Import Wizard: small, supported objects, dedupe.</li>
+<li>Undo an import → Data Loader (CSV of IDs) or Mass Delete Records. Filtered, field-specific export → Data Loader's SOQL export, not Weekly Export (full backup only).</li>
 <li>Data Export Service = free scheduled CSV backup; Recycle Bin holds 15 days.</li>
 <li>Mass Delete ≤250; Mass Transfer reassigns ownership.</li>
 <li>Duplicate management = Matching Rule (how) + Duplicate Rule (action).</li>
@@ -431,8 +510,20 @@ const L=[
 <li>Actions on submit / approve / reject / recall: field updates, email alerts, tasks, outbound messages, create/update records.</li>
 </ul>
 <div class="trap"><b>Trap:</b> a validation rule blocks when its formula is TRUE (not false). Only an approval process locks records natively.</div>
+<h3>Approval process — deeper mechanics</h3>
+<ul>
+<li>The <strong>native, declarative action types</strong> available at any approval stage (submit/approve/reject/recall) are exactly four: <strong>Field Update, Email Alert, Task, Outbound Message</strong>. Chatter Posts and Autolaunched Flows are <em>not</em> native approval actions (a Flow can only be triggered indirectly, e.g. via a field update).</li>
+<li><strong>Recall Actions</strong> specifically reverse a submitted request and <strong>unlock the record</strong> — distinct from Final Approval / Final Rejection / Initial Submission actions, which fire at other points in the lifecycle.</li>
+<li><strong>Delegated Approver</strong>: an approver can temporarily hand off their approval responsibilities to another user for a set date range (e.g. while on leave) — requests route to the delegate automatically, no change to the approval process definition needed.</li>
+<li>When a <strong>queue</strong> is the assigned approver, <strong>any one member</strong> can approve or reject on the queue's behalf — the queue acts as a single entity; unanimous approval from all members is <strong>not</strong> required.</li>
+<li><strong>Troubleshooting "manager can't approve" errors:</strong> check first whether the <em>next</em> approver in the chain is inactive, deleted, or missing — the process can't advance to an invalid target. This is a far more common cause than page-layout or FLS issues.</li>
+<li>Up to <strong>25 approval steps</strong> can be configured per object — plenty of room for complex, multi-criteria routing (e.g. dozens of possible approver combinations) without needing Flow Orchestration.</li>
+<li><strong>Outbound Message</strong> sends XML data via SOAP to an external endpoint (e.g. an HR or billing system) and can be triggered from within an approval process or workflow rule — the native way to combine internal sign-off with external system integration.</li>
+</ul>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>Flow first; Workflow/Process Builder are legacy.</li>
+<li>Native approval actions: Field Update, Email Alert, Task, Outbound Message only. Recall unlocks the record; Delegated Approver reroutes temporarily; a queue-approver needs just one member's response.</li>
+<li>Approval error on submit → check the next approver is active/valid first.</li>
 <li>Validation rule blocks save when formula = TRUE.</li>
 <li>Leads: Web-to-Lead, assignment + auto-response rules, convert → Account/Contact/Opportunity.</li>
 <li>Cases: queues, assignment/auto-response/escalation rules, Web/Email-to-Case.</li>
@@ -471,8 +562,18 @@ const L=[
 9. Escalation, roll-up summary recalc on parent
 10. COMMIT + post-commit (emails, async)</pre>
 <div class="trap"><b>Nail this:</b> before-save flows run <em>before</em> validation rules; after-save flows run <em>after</em> the record is saved; roll-up recalc is late and can cascade to parent automation. Autolaunched (no trigger) does NOT run on record changes — it must be invoked.</div>
+<h3>Flow troubleshooting and extra elements</h3>
+<ul>
+<li>"A flow should be creating records but nothing happens" — the <strong>first thing to check is whether the Flow is Active</strong> (Draft/Inactive flows silently do nothing, even with correct logic).</li>
+<li>The native <strong>Debug</strong> button in Flow Builder is the primary troubleshooting tool: it runs the flow in a safe test mode, lets you simulate trigger conditions and input values, and steps through each element's output — faster than digging through Setup Audit Trail (admin changes only) or raw debug logs (better suited to Apex).</li>
+<li>A <strong>Delete Records</strong> element lets a Flow automate bulk deletion based on field criteria — combine with a Scheduled Flow for recurring cleanup, or a Record-Triggered Flow for immediate deletion on a condition.</li>
+<li>To make a <strong>Screen Flow</strong> reachable from a specific object's records (e.g. visible on Cases), embed it on that object's <strong>Lightning Record Page</strong> via App Builder's Flow component — a Page Layout can't host a flow.</li>
+<li><strong>Scheduled Flow</strong> is the right choice for recurring background batch jobs unrelated to any single record event — e.g. counting open Cases per Account once a week, or a nightly cleanup pass standardizing inconsistent picklist values across existing (not new) records.</li>
+</ul>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>5 flow types; only Screen Flow has UI; only record-triggered reacts to DML.</li>
+<li>Flow doing nothing → check it's Active first. Native Debug button is the go-to troubleshooting tool.</li>
+<li>Delete Records element automates bulk deletion; embed a Screen Flow on a record page via the Flow component.</li>
 <li>Before-save = same-record, no extra DML, before validation. After-save = related records, record already saved.</li>
 <li>Use fault paths for error handling; debug before activating.</li>
 <li>Order: before-save flow → validation → save → after-save flow → workflow updates → roll-up recalc → commit.</li>
@@ -497,8 +598,23 @@ const L=[
 <li>The Salesforce mobile app renders Lightning pages; <strong>compact layouts</strong> define the key highlight fields shown at the top of a mobile record.</li>
 </ul>
 <div class="trap"><b>Trap:</b> change sets only work between orgs with a <em>deployment connection</em> (related orgs) and never delete components.</div>
+<h3>Critical (Release) Updates</h3>
+<p>Salesforce periodically ships <strong>Critical Updates</strong> that can change feature behavior, security enforcement, or API contracts, each with an eventual auto-activation date. Best practice: <strong>activate in a sandbox first</strong> to test for breakage (flows, integrations, custom code) before activating in production. Relying on auto-activation, or activating directly in production, skips the testing safety net.</p>
+<h3>Page layouts are metadata, not data</h3>
+<p>If a field is accidentally removed from a page layout, it is <strong>not</strong> recoverable from the Recycle Bin (that's for deleted <em>records</em>, not layout metadata). Fix it by dragging the field back from the fields palette in the Page Layout editor, or by comparing against a sandbox version if the exact prior layout needs restoring.</p>
+<h3>AppExchange — what's actually there</h3>
+<ul>
+<li>The two things you literally find and use from AppExchange: <strong>Components</strong> (installable apps/packages/Flow templates) and <strong>Consultants</strong> (certified implementation partners/services). "Customers" and "Communities" are not AppExchange offerings.</li>
+<li><strong>Bolt Solutions</strong> — comprehensive, industry-specific templates/packages (often paid, faster full-implementation starting points).</li>
+<li><strong>Flow Solutions</strong> — free, pre-built Flows (e.g. a mortgage-calculator-with-lead-generation flow) — the fit for "tight timeline, no budget, need a templated automated process."</li>
+<li><strong>Lightning Data</strong> — third-party data enrichment (company/contact info), unrelated to building calculators or processes.</li>
+<li>Document merge (quotes, contracts, invoices) has <strong>no native Salesforce engine</strong> — it's solved via AppExchange tools like Conga Composer, Nintex, or S-Docs.</li>
+</ul>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>Custom object record name = Text or Auto-Number; enable features at creation.</li>
+<li>Critical Updates: test in sandbox before activating in production — never rely on auto-activation.</li>
+<li>A removed page-layout field is not in the Recycle Bin (metadata, not data) — drag it back or restore from sandbox.</li>
+<li>AppExchange = Components + Consultants; Bolt (industry templates), Flow Solutions (free flows), Lightning Data (data enrichment) are its main sub-categories.</li>
 <li>Tab types: custom object, Web, Visualforce, Lightning Page.</li>
 <li>Change sets = related-org metadata migration; outbound (source) → inbound (target); target must allow inbound; can't delete components.</li>
 <li>Compact layouts drive mobile highlight fields.</li>
@@ -530,8 +646,34 @@ const L=[
 <li><strong>Subscribe / schedule / send</strong> for both reports and dashboards (refreshed results by email).</li>
 </ul>
 <div class="trap"><b>Traps:</b> "each rep sees only their own numbers, many reps" → dynamic dashboard · "sees dashboard but can't open the report" → missing report-folder access · a dashboard shows the <em>running user's</em> data, not the viewer's.</div>
+<h3>Reports don't enforce security — sharing does</h3>
+<p>If a requirement is "each user should see only their own records," the answer is the <strong>sharing model</strong> (e.g. OWD Private), not a clever report filter or a report saved in a private folder — those don't restrict record-level access, they just filter or hide within what the sharing model already permits. But a personal, self-filtering report is still useful even when sharing already allows seeing others' records: filter by <strong>Owner equals <code>$USER</code></strong> (a dynamic value = the running user) to build "my own records only" without touching sharing at all.</p>
+<h3>Restricting report creation itself</h3>
+<p><strong>Hide Report Types</strong> (Setup → Report Types → "Hide in Report Type Selection") prevents users from building <em>new</em> reports on a given Report Type — the tool for "limit what kinds of reports users can create." Report folder sharing controls access to <em>existing</em> reports, not what new ones can be built.</p>
+<h3>Report features you might not have seen</h3>
+<ul>
+<li><strong>Unique Count</strong>: a summary aggregation that counts <strong>distinct</strong> values of a field (e.g. distinct Accounts that have at least one open Opportunity) — different from a plain row count, which would count every Opportunity.</li>
+<li><strong>Bucket columns work on text/picklist fields too</strong>, not just numbers: e.g. bucket "Cold Call," "Email," and "Web" into one "Digital Outreach" category — the same feature as numeric small/medium/large buckets, applied to categorical values.</li>
+</ul>
+<h3>Dashboards — running user in practice</h3>
+<p>A live trap: OWD on Case is Private, yet reps report seeing <em>all</em> cases on a team dashboard. The cause is almost always the dashboard's <strong>running user</strong> — if it's fixed to a manager/admin with broad access, <em>every</em> viewer inherits that person's visibility regardless of their own sharing. Fix: set the dashboard to <strong>Dynamic</strong> ("View Dashboard As: Logged-in user") so each viewer's own access applies.</p>
+<div class="tbl"><table><thead><tr><th>Tool</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Dashboard Filter</td><td>One global filter (e.g. Case Origin/Status/Owner) applied across <strong>all</strong> components at once, user-selectable</td></tr>
+<tr><td>Bucket Column</td><td><strong>Report</strong>-level categorization of values into custom groups (not a dashboard feature)</td></tr>
+<tr><td>Cross Filter</td><td><strong>Report</strong>-level "with/without" logic on related objects (e.g. Accounts without Opportunities)</td></tr>
+</tbody></table></div>
+<h3>Dashboard folder mechanics</h3>
+<ul>
+<li>Error <strong>"We couldn't find the record you're trying to access"</strong> on a dashboard link almost always means the user lacks <strong>folder</strong> access — not a missing profile or permission set.</li>
+<li>To pull one dashboard out of a shared folder temporarily (e.g. to edit it) without disrupting the rest: edit that dashboard's properties and move it to a <strong>private/admin-only folder</strong>, rather than removing folder access for everyone.</li>
+<li><strong>Enable dashboard feed tracking</strong> to let users post dashboard components directly to Chatter (a "Post to Chatter" button appears) — different from just downloading a chart image.</li>
+<li>A <strong>Text Widget</strong> adds narrative/annotation to a dashboard (headings, callouts, interpretation) — distinct from the <strong>Highlights Panel</strong>, which shows metric values, not commentary.</li>
+</ul>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>Formats: Tabular (export), Summary (groups), Matrix (rows×cols), Joined (blocks).</li>
+<li>Reports never enforce security — sharing/OWD does. "My own records only" view → filter Owner = $USER.</li>
+<li>Hide Report Types restricts what new reports can be built; Unique Count counts distinct values; buckets work on text too.</li>
+<li>Dashboard shows the <em>running user's</em> access — set Dynamic so each viewer sees only their own data.</li>
 <li>"With/without" report types &amp; cross filters find records missing a related child.</li>
 <li>Bucket, row-level &amp; summary formulas add calculation without new fields.</li>
 <li>Running user sets dashboard data; dynamic = each viewer's own data.</li>
@@ -564,8 +706,42 @@ const L=[
 <li><strong>Einstein Trust Layer</strong> = guardrails: secure data retrieval, dynamic grounding, data masking, toxicity detection, audit trail, zero data retention. It secures — it does <strong>not</strong> make output deterministic.</li>
 </ul>
 <div class="trap"><b>Traps:</b> deterministic/exact task → not generative AI · action fails but answers work → check the <em>agent user's</em> permissions · Trust Layer = security/guardrails, not determinism · Conversation Preview tests before activation.</div>
+<h3>Writing good Action Instructions (heavily tested)</h3>
+<p>An Action Instruction should tell the agent three things: <strong>what the action does</strong>, <strong>its goal</strong>, and <strong>when to use it</strong> (an explicit trigger condition) — in plain language, no code/implementation jargon. For each input parameter, also specify its <strong>format</strong> (e.g. "18-character ID," "three-digit code"), its <strong>source</strong> (conversation history vs. user input), and whether it's <strong>required or conditional</strong>.</p>
+<div class="trap"><b>Weak instruction smells:</b> vague scope ("any changes," "any inquiry") with no trigger condition · missing input format/length · no stated source for a value · technical jargon like "code snippet" or "runs in the background."</div>
+<h3>Topic instructions and naming conventions</h3>
+<ul>
+<li><strong>Topic instructions</strong> should include an <strong>extended list of example user utterances</strong> (roughly 10–20 phrasing variations) so the agent recognizes different ways the same intent gets expressed — not generic, not maximally minimal (minimal instructions don't reduce latency; they reduce accuracy).</li>
+<li><strong>Action naming</strong>: use a <strong>consistent verb prefix</strong> across similar actions (e.g. <code>GetCustomerInfo</code>, <code>GetOrderDetails</code>) rather than mixing synonyms (Find/Retrieve/Identify) or dropping the verb entirely — consistency helps the model reliably match intent to the right action.</li>
+</ul>
+<h3>Merge fields and prompt behavior</h3>
+<ul>
+<li><strong>Merge fields</strong> (<code>{!Object.Field}</code>, e.g. <code>{!Case.Subject}</code>) are how a prompt template pulls live record data into a generated response — not Flow, not picklists, not Agent Instructions.</li>
+<li>Prompt Builder responses <strong>vary between test runs</strong> by design: every test click is a fresh, independent call to the LLM, and LLMs are non-deterministic (temperature-driven randomness), not cached or simulated.</li>
+<li>Effective prompts use <strong>natural, plain language</strong> — avoid heavy jargon, abbreviations, or deeply nested conditional logic, which reduce reliability rather than improve it.</li>
+</ul>
+<h3>Grounding and safety</h3>
+<p>Agentforce's <strong>grounding check</strong> evaluates source information, topic instructions, and scope — plus <strong>prompt injection risk</strong> (whether user input is trying to manipulate the agent into ignoring its instructions or leaking restricted data). Grounding does not scan for encrypted fields or search the open web; it does not evaluate data-type compatibility either (that happens at the action/parameter level).</p>
+<h3>Agentic loop and lifecycle behavior</h3>
+<ul>
+<li>When every attempted task in an <strong>agentic loop</strong> comes back unsatisfactory, the agent's next step is to <strong>ask the user for more information</strong> — not immediately escalate to a human, not return a generic caveated answer, and not throw an error. Escalation is a later fallback if clarification also fails.</li>
+<li><strong>Deactivating an agent</strong> blocks only <em>new</em> conversations from starting — any conversation already in progress continues using the existing configuration until that session ends naturally. It does not pause, error, or abruptly close active chats.</li>
+</ul>
+<h3>Restricting sensitive data from an Employee/Service Agent</h3>
+<p>To stop an agent answering questions about restricted data (e.g. an executive's private records), the reliable control is <strong>FLS/object permissions on the agent's running user</strong> — the agent literally cannot retrieve what its user can't query. Agent instructions/guardrails are a "soft" control that a cleverly-phrased question can sometimes route around; they're not a substitute for the actual permission boundary.</p>
+<h3>Agentforce for Sales</h3>
+<ul>
+<li><strong>Agentforce SDR</strong> engages and nurtures leads autonomously, answering questions with responses <strong>grounded in company data</strong> (RAG-based, to avoid hallucination) and handing off qualified leads to human reps. It does <strong>not</strong> negotiate pricing or close deals, and it does not coach human reps (that's a separate conversation-intelligence category of tool).</li>
+<li>A core Agentforce sales use case is <strong>automating lead qualification</strong> (engaging, asking qualifying questions, scoring, booking meetings) — not cold-calling, not mass content generation, and "basic web chat" alone is too generic to count as a specific sales use case.</li>
+<li><strong>Data Cloud</strong> is typically the critical prerequisite before enabling Agentforce for a service team: it unifies and identity-resolves customer data across systems so the agent (and human agents) have one accurate customer view, rather than fragmented, Salesforce-only context.</li>
+<li><strong>Custom Actions</strong> (Flow or Apex) are what let an agent adapt its behavior to real-time input (e.g. branch differently for in-stock vs. out-of-stock) — Data Cloud supplies richer data, but it's the custom action that actually executes conditional logic.</li>
+</ul>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
 <li>Autonomous vs assistive agents; generative AI suits summarise/draft/answer, not exact/guaranteed tasks.</li>
+<li>Action instructions: what it does + goal + explicit trigger condition, plus per-input format/source/required-flag. Topic instructions: 10–20 example utterances.</li>
+<li>Grounding checks source, instructions, scope, <em>and prompt injection risk</em>. Unsatisfactory agentic loop → ask for more info, not escalate.</li>
+<li>Deactivating an agent only blocks new chats; live sessions continue. Restrict sensitive answers via FLS on the agent's user, not instructions alone.</li>
+<li>Agentforce SDR nurtures/qualifies leads with grounded answers — it never negotiates price or closes deals.</li>
 <li>Topics (jobs + instructions) + Actions (what it does), built in Agent Builder.</li>
 <li>Atlas Reasoning Engine plans intent → topic → action → outcome.</li>
 <li>Trust Layer = masking, toxicity, zero retention, audit (security, not determinism).</li>
@@ -580,23 +756,52 @@ const L=[
 <li>Lead Assignment Rules, Web-to-Lead, lead/opportunity scoring (Einstein).</li>
 <li><strong>Opportunity</strong>: Stages tied to sales process/record type, Path, forecast category; Products &amp; Price Books; Territory Management; forecasting.</li>
 <li><strong>Campaigns + Campaign Members</strong> track marketing; Campaign Influence links to opportunities.</li>
+<li><strong>Campaign Hierarchy</strong>: roll several child campaigns (e.g. monthly events) up into one parent campaign for series-level ROI reporting, alongside individual event reporting — same name alone or record types don't create this roll-up relationship.</li>
+<li><strong>Opportunity Contact Roles</strong> record <em>external</em> stakeholders and their influence (Decision Maker, Influencer, Economic Buyer) on one deal — different from <strong>Opportunity/Account Teams</strong>, which track <em>internal</em> collaborators (sales engineer, support rep) across deals.</li>
+<li><strong>Productivity/prioritization tools</strong> (know the distinction):</li>
 </ul>
+<div class="tbl"><table><thead><tr><th>Feature</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Einstein Opportunity Scoring</td><td>Scores each Opportunity 1–99 on win likelihood — prioritize deals</td></tr>
+<tr><td>Einstein Lead Scoring</td><td>Scores Leads on conversion likelihood — prioritize top-of-funnel</td></tr>
+<tr><td>Einstein Activity Capture</td><td>Auto-logs emails/events from Google/Microsoft — saves data entry</td></tr>
+<tr><td>Einstein Search Personalization</td><td>Tunes search results to the user's activity — faster record finding</td></tr>
+<tr><td>Big Deal Alerts</td><td>Notifies leadership when a deal exceeds an amount + probability threshold</td></tr>
+<tr><td>Deal Change Highlights</td><td>Badges recently updated deals directly in List View / Kanban</td></tr>
+<tr><td>Opportunity Update Reminders</td><td>Nudges reps to review stale (not recently touched) opportunities</td></tr>
+</tbody></table></div>
+<p><strong>Recurring Tasks</strong> (an Activities setting) let a rep create one task that repeats on a schedule (e.g. every Monday) — reportable/dashboard-able, unlike a one-time workflow task or a process email alert.</p>
 <h3>Service &amp; Support (10%)</h3>
 <ul>
 <li>Case lifecycle: assignment rules → queues → escalation; auto-response to the customer; Support Process controls Status per record type.</li>
 <li><strong>Web-to-Case / Email-to-Case</strong> capture; <strong>Omni-Channel</strong> routes work; <strong>Knowledge</strong> articles; <strong>Entitlements / Milestones</strong> for SLAs; Case Teams for collaboration.</li>
+<li><strong>Entitlements</strong> attach a contracted support tier (e.g. Gold/Silver/Bronze) to an account — commonly auto-assigned via a Flow when a record becomes a client, rather than set manually per case.</li>
+<li><strong>Milestones + Business Hours</strong> go further than simple case-age tracking: they measure time spent <em>per stage or per team</em> (e.g. how long a case sat with Tier 1 vs. Tier 2), which plain Escalation Rules or Assignment Rules can't report on.</li>
+<li><strong>Support Settings</strong> (not Process Automation Settings) is where you set the <strong>Default Case Owner</strong> and the <strong>Automated Case User</strong> — the identity that shows as Created By/Last Modified By when automation (not a real person) touches a Case; useful to point this at a dedicated integration user to reduce confusion.</li>
+<li><strong>Macros</strong> (paired with Quick Actions) let an agent trigger a whole sequence — e.g. send an email, then update Status and Owner — in one click; distinct from Quick Text (canned text only) and from Autolaunched Flows (background automation, not a one-click agent tool).</li>
 </ul>
 <h3>Productivity &amp; Collaboration (10%)</h3>
 <ul>
 <li><strong>Activities</strong>: Tasks (to-dos) + Events (calendar) on the activity timeline.</li>
+<li>By default, custom objects don't support activities — check <strong>"Allow Activities"</strong> on the custom object (Object Manager) so Tasks/Events can relate to it; adding a related list or CRUD/profile access alone won't enable it.</li>
 <li><strong>Chatter</strong>: feeds, groups (public/private/unlisted), internal vs external users, follow records/people.</li>
+</ul>
+<div class="tbl"><table><thead><tr><th>Chatter group type</th><th>Visible to non-members?</th></tr></thead><tbody>
+<tr><td>Public</td><td>Yes — anyone can view/join</td></tr>
+<tr><td>Private</td><td>Group's existence/description visible; joining needs approval</td></tr>
+<tr><td>Unlisted</td><td><strong>Completely hidden</strong> — no visibility of the group, members, or posts</td></tr>
+</tbody></table></div>
+<p><strong>Chatter Stream</strong> (a custom, curated feed pulling from multiple groups, records, and specific people like the CEO) is the answer for "one place to see updates from everywhere" — different from the default <strong>Chatter Feed</strong> (only what you personally follow) and <strong>Daily Digest</strong> (a periodic email summary, not a live in-app view).</p>
+<ul>
 <li><strong>AppExchange</strong>: managed vs unmanaged packages; partners publish; AgentExchange for agents. Mobile app customisation &amp; branding.</li>
 </ul>
 <div class="takeaways"><h4>Key takeaways</h4><ul>
-<li>Lead convert → Account + Contact + Opportunity; campaigns track members &amp; influence.</li>
-<li>Cases: assignment → queue → escalation, Web/Email-to-Case, Omni-Channel, Knowledge, Entitlements (SLA).</li>
-<li>Activities = Tasks + Events; Chatter groups have three privacy levels.</li>
-<li>Managed (upgradeable) vs unmanaged (editable) packages on AppExchange.</li>
+<li>Lead convert → Account + Contact + Opportunity; campaigns track members &amp; influence; Campaign Hierarchy rolls up series-level ROI.</li>
+<li>Opportunity Contact Roles = external stakeholders; Opportunity/Account Teams = internal collaborators.</li>
+<li>Know the Einstein-feature table: Opportunity Scoring, Lead Scoring, Activity Capture, Search Personalization each do different things.</li>
+<li>Cases: assignment → queue → escalation, Web/Email-to-Case, Omni-Channel, Knowledge, Entitlements (SLA) with Milestones for per-stage/team timing.</li>
+<li>Support Settings sets the Default Case Owner + Automated Case User (audit-trail identity for automation).</li>
+<li>Activities = Tasks + Events, needs "Allow Activities" enabled on custom objects. Chatter: Unlisted hides everything from non-members; Private is visible but gated.</li>
+<li>Managed (upgradeable, code-protected) vs unmanaged (editable) packages on AppExchange.</li>
 </ul></div>`}
 ];
 
