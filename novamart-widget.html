@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NovaMart support demo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath fill='%231B79BC' d='M20 2C21.5 12 28 18.5 38 20 28 21.5 21.5 28 20 38 18.5 28 12 21.5 2 20 12 18.5 18.5 12 20 2Z'/%3E%3C/svg%3E">
 <style>
   :root {
     --bg: #F6F8F9;
@@ -13,6 +14,7 @@
     --line: #D8E0E5;
     --blue: #1B79BC;
     --blue-soft: #E3F2FB;
+    --glass: #7FD6D6;
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark) {
@@ -24,6 +26,7 @@
       --line: #2A3947;
       --blue: #6DB6EA;
       --blue-soft: #17303F;
+      --glass: #3FA8A8;
     }
   }
   * { box-sizing: border-box; }
@@ -35,6 +38,10 @@
     padding: 4rem 1.5rem 7rem; /* bottom room for the widget button */
   }
   :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+  .brand { max-width: 560px; margin: 0 auto 1.25rem; display: flex; align-items: center; gap: 0.6rem; }
+  .brand svg { width: 38px; height: 38px; flex: none; }
+  .brand .name { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .brand .name span { color: var(--blue); }
   .script { max-width: 560px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.6rem 1.75rem; }
   .script h1 { font-size: 1.35rem; letter-spacing: -0.02em; margin: 0 0 1rem; }
   .script ol { margin: 0; padding-left: 1.3rem; }
@@ -45,6 +52,14 @@
 </style>
 </head>
 <body>
+
+<header class="brand">
+  <svg viewBox="0 0 40 40" role="img" aria-label="NovaMart logo mark">
+    <path fill="var(--blue)" d="M20 2C21.5 12 28 18.5 38 20 28 21.5 21.5 28 20 38 18.5 28 12 21.5 2 20 12 18.5 18.5 12 20 2Z"/>
+    <path fill="var(--glass)" d="M32 3C32.6 6.4 34.6 8.4 38 9 34.6 9.6 32.6 11.6 32 15 31.4 11.6 29.4 9.6 26 9 29.4 8.4 31.4 6.4 32 3Z"/>
+  </svg>
+  <div class="name">Nova<span>Mart</span></div>
+</header>
 
 <main class="script">
   <h1>Try this call</h1>
